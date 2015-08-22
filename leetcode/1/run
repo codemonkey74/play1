@@ -1,0 +1,2 @@
+#!/bin/bash
+a=${1:-$(ls -1tr *.cpp|tail -n 1)};rm -f x;g++ -o x -std=c++11 $a && ./x
