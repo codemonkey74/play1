@@ -1,10 +1,19 @@
 #include <iostream>
 #include <vector>
+#include <exception>
+struct badcode: public std::exception {
+    const std::string mm;
+    badcode(const char* m) : mm(m) {} 
+    virtual const char* what() const _NOEXCEPT {
+        return mm.c_str();
+    }
+};
 class Solution {
 public:
     size_t cwl,  cred, cblue;
     bool ir, iw, ib;
     bool swap(std::vector<int>& nums, size_t idx1, size_t idx2) {
+        if (idx1 == idx2) return false;
         std::cout << "Changing pos " << idx1 << " and " << idx2 << std::endl;
         int aux = nums[idx1];
         nums[idx1] = nums[idx2];
@@ -23,6 +32,7 @@ public:
             else { cwl = cblue - 1; }
             return cwl;
         }
+        //if (cwl == 0) throw new badcode("white underun");
         return --cwl;
     }
 
@@ -34,10 +44,11 @@ public:
             cblue = nums.size() - 1;
             if (!iw) { return cblue; }
         } else {
+          //  if (cblue == 0) throw badcode("blue underun");
             --cblue;
         }
         if (iw && cwl == cblue) { 
-            swap(nums, nextcw(nums, i), cblue);
+            cwl = nextcw(nums, cwl);
         }
         return cblue;
     }
@@ -49,6 +60,7 @@ public:
             ir = true;
             return cred;
         }
+        //if (cred == nums.size() - 1) throw badcode("red overrun");
         return ++cred;
     }
     
@@ -59,15 +71,17 @@ public:
        cwl = cblue;
        for (size_t i = 0; i < nums.size();) {
            print(nums, i, "i");
-           if (nums[i] == 0) { if (ir && i <= cred) { ++i; continue; } else { swap(nums, i, nextred(nums, i)); continue; }}
+           if (nums[i] == 0) { if (ir && i <= cred) { ++i; continue; } else { swap(nums, i, nextred(nums, i)); }}
            print(nums, i, "r");
-           if (nums[i] == 1) { if (iw && i >= cwl && (!ib || i < cblue)) { ++i; continue; } else { swap(nums, i, nextcw(nums, i)); continue; }}
+           if (nums[i] == 1) { if (iw && i >= cwl && (!ib || i < cblue)) { ++i; continue; } else { swap(nums, i, nextcw(nums, i)); }}
            print(nums, i, "w");
-           if (nums[i] == 2) { if (ib && i >= cblue) { ++i; continue; } else { swap(nums, i, nextblue(nums, i)); continue; }}
+           if (nums[i] == 2) { if (ib && i >= cblue) { ++i; continue; } else { swap(nums, i, nextblue(nums, i)); }}
            print(nums, i, "b");
        }
+       std::cout << "sort done" << std::endl;
     }
     void print(std::vector<int>& nums, size_t i, std::string s = "" ) {
+        return;
         std::cout << s <<  i << "(" << cred << "," << cwl << "," <<  cblue << ") "; 
         for (size_t j=0; j<nums.size(); j++) {
             std::cout << nums[j] << ",";
@@ -125,7 +139,11 @@ int main() {
     for(Lvi::iterator it=lists.begin(); it != lists.end(); ++it, ++x) {
         Solution* s = new Solution();
         std::cout << "Running line " << x << " size " << (*it).size() << std::endl;
-        s->sortColors(*it);
+        try {
+            s->sortColors(*it);
+        } catch (badcode& e) {
+            std::cout << "error " << e.what() << std::endl;
+        }
         delete s;
 
         std::cout << "Checking ";

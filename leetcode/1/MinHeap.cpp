@@ -7,24 +7,22 @@ template<typename T, const size_t B>
 class MinHeap {
         std::array<T, B> heap;
         const size_t heap_size;
+        inline void swapit(size_t idx1, size_t idx2) {
+            if (idx2 < heap_size) {
+                if (heap[idx2] < heap[idx1]) {
+                    std::swap(heap[idx1], heap[idx2]);
+                    Heapfy(idx2);
+                }
+            }
+        }
 
         void Heapfy(size_t idx) {
             size_t left  = getLeft(idx);
             size_t right = getRight(idx);
-            size_t smallest = idx;
-            if (left < heap_size) {
-                if(heap[left] < heap[idx]) 
-                    smallest = left;
-            }
-            if (right < heap_size) {
-                if (heap[right] < heap[idx])
-                    smallest = right;
-            }
-            std::cout << "s" << left << "," << right << " : " << smallest << " <> " << idx << std::endl;
-            if (smallest != idx) {
-                std::swap(heap[idx], heap[smallest]);
-                Heapfy(smallest);
-            }
+            swapit(idx, left);
+            //std::cout << "s" << left << "," << right << " : " << idx << "   " << (*this) << std::endl;
+            swapit(idx, right);
+            //std::cout << "s" << left << "," << right << " : " << idx << "   " << (*this) << std::endl;
         }
     public:
         MinHeap(): heap(), heap_size(B) {} 
@@ -50,18 +48,30 @@ class MinHeap {
             return out;
         }
 
-        inline void set(const size_t idx, const T& value) {
+        inline void ini(const size_t idx, const T& value) {
             heap[idx] = value;
+        }
+
+        void set(const size_t idx, const T& value) {
+            ini(idx, value);
+            Heapfy(idx);
         }
 };
 
 int main() {
     MinHeap<int, 5> a;
-    for (auto i=0; i< 5;++i){ a.set(i,4-i); }
+    for (auto i=0; i< 5;++i){ a.ini(i,4-i); }
 
     std::cout << a << std::endl;
     a.doHeapfy();
     std::cout << a << std::endl;
+    a.set(0, 5);
+    std::cout << a << std::endl;
+    a.set(0, 3);
+    std::cout << a << std::endl;
+    a.set(1, 7);
+    std::cout << a << std::endl;
+
 
     return 0;
 }
