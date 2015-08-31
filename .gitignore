@@ -1,3 +1,6 @@
 **/target/
 **/lixo*
 .*.swp
+**/.idea/
+**/*.iml
+**/*.tgz
