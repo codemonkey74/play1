@@ -146,23 +146,13 @@ class Parser {
     }
 
     public:
-        enum typt {DEADEND, GOAL, VALUES};
-        using resulttype = std::pair<Parser::typt, std::vector<unsigned long>>;
-        resulttype getResults(const std::string& str) {
+        std::vector<unsigned long> resulttype getResults(const std::string& str) {
             std::vector<unsigned long> results;
             std::string::const_iterator p = str.begin();
             Parser::typt typ = DEADEND; 
             while (p != str.end()) {
                 if (isEndOfRec(str, p)) {
                     continue; //blank lines.
-                }
-                if (isMatchText(str, p, "DEADEND")) {
-                    typ = DEADEND;
-                    break;
-                }
-                if (isMatchText(str, p, "GOAL")) {
-                    typ = GOAL;
-                    break;
                 }
                 unsigned long res = calculate(str, p); 
                 if (isEndOfRec(str, p)) {
@@ -172,7 +162,7 @@ class Parser {
                     throw createException(str, p, "record did not ended properly");
                 }
             }
-            return std::make_pair(typ, std::move(results));
+            return std::move(results);
         }
 };
 
