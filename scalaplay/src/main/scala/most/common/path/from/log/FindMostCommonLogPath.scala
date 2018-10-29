@@ -1,36 +1,49 @@
 package most.common.path.from.log
 
-object FindMostCommonLogPath extends App with PagesCvt {
+import scala.most.common.path.from.log.Time
 
+object FindMostCommonLogPath extends App {
+
+  def threePath(logFileName: String) = {
     import scala.io.Source
-
-    //1. get records from file
-    (for { lines <- Source.fromURL(this.getClass.getResource("/input2_loadtimes.txt")).getLines()
-           a = lines.split(",")
-           cl = Client(a(1))
-           pg = Page(a(2))
+    (for {
+    lines <- Source.fromURL(this.getClass.getResource(logFileName)).getLines()
+      a = lines.split(",")
+      cl = Client(a(1))
+      pg = PageTime(a(2), Time(("0" + a(3).filter(_.isDigit)).toInt))
     } yield (cl, pg))
-    //2. build users paths
-    .foldRight(Map.empty[Client, Seq[Page]]) {
-      case ((cl, pg), m) if m.isDefinedAt(cl) => m + (cl -> (m(cl) :+ pg))
-      case ((cl, pg), m) => m + (cl -> Seq(pg))
-    }//3. gen 3 steps paths
-    .flatMap {
-      case (_, seq) if seq.length > 2 => for {
-        i <- 0 to seq.length - 3
-        r = seq.slice(i, i + 3)
-      } yield PageSeqToPages(r.reverse)
-    }
-    //4. Histogram of 3 step paths
-    .groupBy(identity).mapValues(_.size)
-    //5. Filter Max
-    .foldRight((Seq.empty[Pages], 0)) {
-      case ((p, count), (s, max)) if count < max => (s, max)
-      case ((p, count), (s, max)) if count == max => (s :+ p, max)
-      case ((p, count), (s, max)) if count > max => (Seq(p), count)
-    }
-    //6. output
-    match {
-      case (s: Seq[Pages], max: Int) => s.foreach(p => println(p + " -> " + max))
-    }
+      //2. build users paths
+      .toSeq.groupBy(_._1)
+      //3. gen 3 steps paths
+      .flatMap {
+        case (cl, seq) if seq.length > 2 => for {
+            i <- 0 to seq.length - 3
+            r = seq.map(x => x._2).slice(i, i + 3)
+          } yield Some(Pages(r), cl)
+        case _ => None
+      }.flatten
+  }
+
+
+
+  //1. get records from file
+  val f = threePath("/input0_loadtimes.txt")
+
+  //2. Get all Step Paths.
+  val x = f
+  //3. Strip clients
+    .map(_._1)
+  //3. Histogram of 3 step paths
+    .groupBy(_.asPath).mapValues(_.size)
+  //4. Max paths
+  println(x.maxBy(_._2)._1)
+
+  //2. Slowest PATH.
+  val y = f
+  //3. Max time
+  val maxY = y.maxBy(_._1.time.t)._1
+  //4. all clients
+  val clY = y.filter(_._1.asPath == maxY.asPath).map(_._2)
+  //5. output
+  println(s"${maxY.asPath}, ${maxY.time}, ${clY.mkString("[", ",", "]")}")
 }

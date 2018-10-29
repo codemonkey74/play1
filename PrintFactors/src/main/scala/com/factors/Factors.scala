@@ -19,7 +19,7 @@ class Factors(n: Long) extends Printer {
   }
 
   /**
-   * Keeps all divisors on an immutable List.
+   * Keep all divisors on an immutable List.
    */
   lazy val lowDivisors: List[Long] =
     getLowDivisors_(n)
